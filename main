@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import argparse
 
 def get_args():
@@ -28,6 +30,10 @@ def main():
     except ModuleNotFoundError:
         print("Day hasn't been solved yet.")
         return
+
+    print("Day", day)
+    print("--------")
+    print()
 
     if star is None or star == 1:
         try:
