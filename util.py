@@ -2,15 +2,25 @@ import os
 import time
 import traceback
 
+def _get_filename(day):
+    return 'input' + str(day) + '.txt'
+
 def get_input_lines(day):
     """Read the day's input file and yield each line, without the newline
     character.
 
     """
-    filename = 'input' + str(day) + '.txt'
+    filename = _get_filename(day);
     with open(filename) as f:
         for line in f:
             yield line.strip()
+
+def get_input_text(day):
+    """Get whole text of the input file"""
+    filename = _get_filename(day)
+    with open(filename) as f:
+        text = f.read()
+    return text.strip()
 
 def timing_wrapper(fun):
     """Decorator. Call fun with no arguments, timing it and nicely
