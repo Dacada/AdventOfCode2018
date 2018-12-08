@@ -5,6 +5,17 @@ import traceback
 def _get_filename(day):
     return 'input' + str(day) + '.txt'
 
+def get_input_words(day):
+    """Read the day's input file and yield each whitespace separated word,
+    without any whitespace or "empty" words.
+
+    """
+    filename = _get_filename(day)
+    with open(filename) as f:
+        for word in f.read().split():
+            if not word.isspace():
+                yield word
+
 def get_input_lines(day):
     """Read the day's input file and yield each line, without the newline
     character.
