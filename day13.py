@@ -89,8 +89,12 @@ def tick(map, carts, cartcoords, return_on_collision):
                         direction = '<'
                     elif direction == '<':
                         direction = '^'
+            else:
+                raise Exception(str((track,cart)))
 
             x,y = advance(x,y,direction)
+            if x < 0 or y < 0:
+                raise Exception(str((track,cart)))
             if ((x,y)) in cartcoords:
                 collision = (x,y)
                 if return_on_collision:
