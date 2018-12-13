@@ -44,6 +44,11 @@ def tick(map, carts, cartcoords, return_on_collision):
         row = carts[y]
         for cart in sorted(row, key=lambda n: n[1]):
             x,y,direction,memory = cart
+
+            if collision is not None:
+                if collision == (x,y):
+                    continue
+            
             cartcoords.remove((x,y))
             track = map[y][x]
             if track == '-' or track == '|':
@@ -99,24 +104,46 @@ def tick(map, carts, cartcoords, return_on_collision):
                 collision = (x,y)
                 if return_on_collision:
                     return collision,None
+                else:
+                    if x in newcarts: # it has already moved this tick
+                        found = False
+                        l = []
+                        for cart in newcarts[x]:
+                            if cart[1] == y:
+                                found = True
+                            else:
+                                l.append(cart)
+                        if not found:
+                            raise Exception()
+                        newcarts[x] = l
+                    else: # it has not moved this tick, it'll be removed when next processed by checking collision
+                        found = False
+                        for cart in carts[x]:
+                            if cart[1] == y:
+                                found = True
+                        if not found:
+                            raise Exception()
+                    cartcoords.remove((x,y))
             else:
                 cartcoords.add((x,y))
                 insert_cart(newcarts, x, y, direction, memory)
-
-    if collision is not None:
-        for possible_direction in ('<','>','^','v'):
-            x,y = advance(*collision, possible_direction)
-            cartcoords.discard((x,y))
-            if x in newcarts:
-                newcarts[x] = [c for c in newcarts[x] if c[1] != y]
-                if not newcarts[x]:
-                    del newcarts[x]
                 
-    return None,newcarts
+    return collision,newcarts
+
+def print_map(map, cartcoords):
+    for y in range(len(map)):
+        row = map[y]
+        for x in range(len(row)):
+            track = row[x]
+            if (x,y) in cartcoords:
+                print('X',end='')
+            else:
+                print(track,end='')
+        print()
         
 @util.timing_wrapper
 def star1():
-    map = [list(row) for row in util.get_input_text(DAY).split('\n')]
+    map = [list(row) for row in util.get_input_text_notrim(DAY).split('\n')]
     carts,cartcoords = init_from_map(map)
 
     collision = None
@@ -127,10 +154,12 @@ def star1():
             
 @util.timing_wrapper
 def star2():
-    map = [list(row) for row in util.get_input_text(DAY).split('\n')]
+    map = [list(row) for row in util.get_input_text_notrim(DAY).split('\n')]
     carts,cartcoords = init_from_map(map)
-    
+
     while len(cartcoords) > 1:
+        #print_map(map, cartcoords)
+        #input()
         collision,carts = tick(map,carts,cartcoords,False)
 
     return ','.join(str(n) for n in cartcoords.pop())
