@@ -33,6 +33,13 @@ def get_input_text(day):
         text = f.read()
     return text.strip()
 
+def get_input_text_notrim(day):
+    """Get whole text of the input file without trimming"""
+    filename = _get_filename(day)
+    with open(filename) as f:
+        text = f.read()
+    return text
+
 def timing_wrapper(fun):
     """Decorator. Call fun with no arguments, timing it and nicely
     printing its return value and taken time
