@@ -1,4 +1,5 @@
 import util
+import subprocess
 from day16 import VirtualMachine
 
 DAY = 19
@@ -20,11 +21,15 @@ class VirtualMachineV2(VirtualMachine):
             self.ip = self.regs[self.reg_bound_to_ip]
         return wrapper
 
-    def run(self, program):
+    def run(self, program, maxinstr=None):
+        instrcnt = 0
         while self.ip < len(program):
             instr,a,b,c = program[self.ip]
             getattr(self, instr)(a, b, c)
             self.ip += 1
+            instrcnt += 1
+            if maxinstr is not None and instrcnt >= maxinstr:
+                break
 
 def get_program(lines):
     program = []
@@ -55,11 +60,29 @@ def star1():
 
 @util.timing_wrapper
 def star2():
+    """After a lot of reverse engineering (see 2017,day23) this program
+    calculates an enormous number at r5, then adds up its divisors into
+    r0.
+
+    So just run the vm for something like 1000 cycles, then stop it
+    and get the value of r5.  Then get the factors of that number, add
+    them up, return that.
+
+    """
     program,ip_reg = get_program(util.get_input_lines(DAY))
     vm = VirtualMachineV2(ip_reg)
     vm.regs[0] = 1
-    vm.run(program)
-    return vm.regs[0]
+
+    vm.run(program, 1000)
+    n = max(vm.regs)
+    cp = subprocess.run(['factor', str(n)], capture_output=True, text=True) #not cheating
+
+    sum_divisors = 1
+    factors_list = [int(x) for x in cp.stdout.split(':')[1].split() if not x.isspace()]
+    factors = {factor:factors_list.count(factor) for factor in factors_list}
+    for factor in factors:
+        sum_divisors *= (factor ** (factors[factor] + 1) - 1) / (factor - 1)
+    return int(sum_divisors)
 
 if __name__ == '__main__':
     util.pretty_print(star1, star2)
